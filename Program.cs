@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using OpenTK;
 using OpenTK.Graphics;
@@ -24,11 +25,11 @@ namespace Pong
             //_paddle1 = new PaddleHuman(paddle1StartPos, PaddleHuman.ControlScheme.WASD);
             //_paddle2 = new PaddleHuman(paddle2StartPos, PaddleHuman.ControlScheme.ArrowKeys);
 
-            //_paddle1 = new PaddleBasicCPU(paddle1StartPos);
+            //_paddle1 = new PaddleBasicCPU(paddle1StartPos, false);
             //_paddle2 = new PaddleBasicCPU(paddle2StartPos, false);
 
-            _paddle1 = new PaddleAntonAI(paddle1StartPos, "player1");
-            _paddle2 = new PaddleAntonAI(paddle2StartPos, "player2");
+            _paddle1 = new PaddleAI(paddle1StartPos, "player1");
+            _paddle2 = new PaddleAI(paddle2StartPos, "player2");
 
             _pongGame = new PongGame(_paddle1, _paddle2);
 
@@ -39,20 +40,15 @@ namespace Pong
             _gameWindow.Resize += GameWindowOnResize;
             _gameWindow.Closing += GameWindowOnClosing;
             _gameWindow.KeyDown += GameWindowOnKeyDown;
+            _gameWindow.KeyUp += GameWindowOnKeyUp;
 
             _gameWindow.Run();
         }
 
-        private static void GameWindowOnKeyDown(object sender, KeyboardKeyEventArgs e)
-        {
-            if(e.Key == Key.Number1) {
-                PongGame.GameSpeed = 1;
-            }
+        
+        private static void GameWindowOnKeyDown(object sender, KeyboardKeyEventArgs e) => KeyboardState.Keys.Add(e.Key);
 
-            if(e.Key == Key.Number2) {
-                PongGame.GameSpeed = 15000;
-            }
-        }
+        private static void GameWindowOnKeyUp(object sender, KeyboardKeyEventArgs e) => KeyboardState.Keys.Remove(e.Key);
 
         private static void GameWindowOnClosing(object sender, CancelEventArgs cancelEventArgs) => _pongGame.GameExiting();
 

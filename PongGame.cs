@@ -59,10 +59,8 @@ namespace Pong
 
             _oldMouseState = mouseState;
 
-            //Doesnt work with dotnetcore
-            var keyboardState = Keyboard.GetState();
-            if (keyboardState.IsKeyDown(Key.Number1)) GameSpeed = 1;
-            if (keyboardState.IsKeyDown(Key.Number2)) GameSpeed = 15000;
+            if (KeyboardState.IsKeyDown(Key.Number1)) GameSpeed = 1;
+            if (KeyboardState.IsKeyDown(Key.Number2)) GameSpeed = 15000;
         }
 
         private void UpdateBall(double delta)
@@ -90,7 +88,6 @@ namespace Pong
 
         private void PaddleCollision(Paddle paddle)
         {
-            //For all 4 sides
             //Vertical sides
             if (BallPosition.Y > paddle.Position.Y && BallPosition.Y < paddle.Position.Y + Paddle.PaddleHeight)
             {

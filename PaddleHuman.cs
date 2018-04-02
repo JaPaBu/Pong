@@ -19,18 +19,16 @@ namespace Pong
         }
 
         protected override Move GetMove(PongGame pongGame)
-        {
-            var keyboardState = Keyboard.GetState();
-
+        {            
             if (_controlScheme == ControlScheme.WASD)
             {
-                if (keyboardState.IsKeyDown(Key.W)) return Move.Up;
-                if (keyboardState.IsKeyDown(Key.S)) return Move.Down;
+                if (KeyboardState.IsKeyDown(Key.W)) return Move.Up;
+                if (KeyboardState.IsKeyDown(Key.S)) return Move.Down;
             }
             else if (_controlScheme == ControlScheme.ArrowKeys)
             {
-                if (keyboardState.IsKeyDown(Key.Up)) return Move.Up;
-                if (keyboardState.IsKeyDown(Key.Down)) return Move.Down;
+                if (KeyboardState.IsKeyDown(Key.Up)) return Move.Up;
+                if (KeyboardState.IsKeyDown(Key.Down)) return Move.Down;
             }
 
             return Move.Nothing;

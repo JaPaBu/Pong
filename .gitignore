@@ -25,3 +25,5 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+player1.bin
+player2.bin

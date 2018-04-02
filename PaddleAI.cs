@@ -7,7 +7,7 @@ using OpenTK;
 
 namespace Pong
 {
-    internal class PaddleAntonAI : Paddle
+    internal class PaddleAI : Paddle
     {
         private class Person : IComparable<Person>
         {
@@ -28,6 +28,7 @@ namespace Pong
 
         private const double MutationChance = 0.15;
         private const double MutationAmplitude = 0.25;
+        private const int GenerationCap = 500000;
 
         private readonly int _weightsCount;
         private readonly List<double[]> _layers = new List<double[]>();
@@ -37,11 +38,12 @@ namespace Pong
         private Person CurrentPerson => _persons[_currentPersonIndex];
         private int _hitBallCounter;
         private int _wonCounter;
-        
+        private int _currentGeneration = 1;
+
         private readonly string _name;
         private string FileName => _name + ".bin";
 
-        public PaddleAntonAI(Vector2d position, string name) : base(position)
+        public PaddleAI(Vector2d position, string name) : base(position)
         {
             _name = name;
             _layers.Add(new double[6]);
@@ -67,7 +69,7 @@ namespace Pong
             => Map(value, inMin, inMax, -1, +1);
 
         private static double Sigmoid(double value)
-            => 1 / Math.Sqrt(1 + value*value);
+            => 1 / Math.Sqrt(1 + value * value);
 
         // private static double Sigmoid(double value)
         // {
@@ -97,9 +99,9 @@ namespace Pong
         private void PopulateFirstLayer(PongGame pongGame)
         {
             var layer = _layers[0];
-            
+
             //Self y-position
-            layer[0] = Normalize(Position.Y, -PaddleHeight/2, 720 - PaddleHeight/2);
+            layer[0] = Normalize(Position.Y, -PaddleHeight / 2, 720 - PaddleHeight / 2);
 
             //Self y-speed
             layer[1] = Normalize(Velocity.Y, -PaddleMaxSpeed, +PaddleMaxSpeed);
@@ -113,16 +115,15 @@ namespace Pong
             //Ball y-speed
             layer[4] = Normalize(pongGame.BallVelocity.Y, -PongGame.MaxBallSpeedY, +PongGame.MaxBallSpeedY);
 
-            //Ball x-speed towards paddle
-            layer[5] = Normalize(pongGame.BallVelocity.X, -PongGame.MaxBallSpeedX, +PongGame.MaxBallSpeedX);
-            if(Position.X < pongGame.BallPosition.X) layer[5] = -layer[5];
+            //Ball x-speed
+            layer[5] = Math.Abs(Normalize(pongGame.BallVelocity.X, -PongGame.MaxBallSpeedX, +PongGame.MaxBallSpeedX));
         }
 
         private void MutatePerson(Person source, Person dest)
         {
             for (var i = 0; i < source.Weights.Length; i++)
-                if(MutationChance > Random.NextDouble())
-                    dest.Weights[i] = source.Weights[i] + (Random.NextDouble()-0.5)*MutationAmplitude*2;
+                if (MutationChance > Random.NextDouble())
+                    dest.Weights[i] = source.Weights[i] + (Random.NextDouble() - 0.5) * MutationAmplitude * 2;
                 else
                     dest.Weights[i] = source.Weights[i];
         }
@@ -250,8 +251,8 @@ namespace Pong
             }
 
             var ballDistance = Math.Abs(pongGame.BallPosition.Y - (Position.Y + PaddleHeight / 2));
-            CurrentPerson.Fitness = _hitBallCounter * 50 - ballDistance/2 + _wonCounter*0;
-            //CurrentPerson.Fitness = _hitBallCounter;
+            //CurrentPerson.Fitness = Math.Sqrt(_hitBallCounter * _hitBallCounter + _wonCounter * _wonCounter) - ballDistance/2;
+            CurrentPerson.Fitness = _hitBallCounter;
             _hitBallCounter = 0;
             _wonCounter = 0;
 
@@ -259,7 +260,14 @@ namespace Pong
 
             if (_currentPersonIndex < _persons.Count) return;
 
-            MutatePersons();
+            if (_currentGeneration < GenerationCap)
+            {
+                MutatePersons();
+                _currentGeneration++;
+                if (_currentGeneration % 50 == 0)
+                    Console.WriteLine($"[{_name}] New generation " + _currentGeneration);
+            }
+
             _currentPersonIndex = 0;
         }
 
